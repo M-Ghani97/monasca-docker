@@ -3,11 +3,13 @@ services:
 
   memcached:
     image: memcached:${MEMCACHED_VERSION}
+    restart: always
     environment:
       LOGSTASH_FIELDS: "service=memcached"
 
   influxdb:
     image: influxdb:${INFLUXDB_VERSION}
+    restart: always
     environment:
       LOGSTASH_FIELDS: "service=influxdb"
   influxdb-init:
@@ -19,6 +21,7 @@ services:
 
   alarms:
     image: monasca/alarms:${MON_ALARMS_VERSION}
+    restart: always
     environment:
       LOGSTASH_FIELDS: "service=monasca-alarms"
       OS_PASSWORD: "letmein"
@@ -29,20 +32,21 @@ services:
 
   zookeeper:
     image: zookeeper:${ZOOKEEPER_VERSION}
+    restart: always
     environment:
       LOGSTASH_FIELDS: "service=zookeeper"
-    restart: on-failure
 
   kafka:
     image: monasca/kafka:2.12-2.0.1-0.0.2 #monasca/kafka:${MON_KAFKA_VERSION}
+    restart: always
     environment:
       KAFKA_DELETE_TOPIC_ENABLE: "true"
       LOGSTASH_FIELDS: "service=kafka"
-    restart: on-failure
     depends_on:
       - zookeeper
   kafka-watcher:
     image: monasca/kafka-watcher:${MON_KAFKA_WATCHER_VERSION}
+    restart: always
     environment:
       BOOT_STRAP_SERVERS: "kafka"
       PROMETHEUS_ENDPOINT: "0.0.0.0:8080"
@@ -70,6 +74,7 @@ services:
 
   mysql:
     image: mysql:${MYSQL_VERSION}
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: secretmysql
       LOGSTASH_FIELDS: "service=mysql"
@@ -82,11 +87,13 @@ services:
 
   monasca-sidecar:
     image: timothyb89/monasca-sidecar:${MON_SIDECAR_VERSION}
+    restart: always
     environment:
       LOGSTASH_FIELDS: "service=monasca-sidecar"
 
   monasca:
     image: monasca/api:${MON_API_VERSION}
+    restart: always
     environment:
       SIDECAR_URL: http://monasca-sidecar:4888/v1/ingest
       LOGSTASH_FIELDS: "service=monasca-api"
@@ -110,9 +117,9 @@ services:
 
   monasca-persister:
     image: monasca/persister:${MON_PERSISTER_VERSION}
+    restart: always
     environment:
       LOGSTASH_FIELDS: "service=monasca-persister"
-    restart: on-failure
     depends_on:
       - monasca
       - influxdb
@@ -121,6 +128,7 @@ services:
 
   thresh:
     image: monasca/thresh:${MON_THRESH_VERSION}
+    restart: always
     environment:
       NO_STORM_CLUSTER: "true"
       WORKER_MAX_HEAP_MB: "256"
@@ -131,6 +139,7 @@ services:
 
   monasca-notification:
     image: monasca/notification:${MON_NOTIFICATION_VERSION}
+    restart: always
     environment:
       NF_PLUGINS: "webhook"
       LOGSTASH_FIELDS: "service=monasca-notification"
@@ -144,6 +153,7 @@ services:
 
   grafana:
     image: monasca/grafana:${MON_GRAFANA_VERSION}
+    restart: always
     environment:
       LOG_LEVEL: DEBUG
       GRAFANA_USERNAME: grafana-admin
